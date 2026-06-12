@@ -1,2 +1,1 @@
-main/java/com/framework/Main.class
-main/java/com/framework/servlet/FrontControllerServlet.class
+com/framework/servlet/FrontControllerServlet.class
