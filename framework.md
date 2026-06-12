@@ -29,3 +29,24 @@
     - declarer dans le fichier de configuration le servlet web.xml
         - declarer le servlet
         - y mettre le chemin du servlet
+
+
+**12-06-26**
+- On va avoir un controller annote @Controller 
+    - a un methode annotee (ex:@GetMapping)
+        - 
+
+- Il faut que je sache creer et recuperer et tester si mon annotation marche bien
+    - l'annotation peut etre dans une classe, dans un attribut, ou dans une methode
+    - il faut definir les variables que l'on peut declarer dans une 
+    - je dois le creer
+    - il ressemble a une annotation
+
+- Creer les annotations
+    - Son nom
+    - Avoir des valeurs des attributs
+    - Quelles sont les variables que l'on peut utiliser
+    - Le tester dans le dossier test
+        - comment recuperer les valeurs des annotations
+
+- 
