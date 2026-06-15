@@ -48,5 +48,4 @@
     - Quelles sont les variables que l'on peut utiliser
     - Le tester dans le dossier test
         - comment recuperer les valeurs des annotations
-
 - 
