@@ -1,22 +1,13 @@
 #!/bin/bash
 
-echo "===== BUILD FRAMEWORK ====="
+echo "=== CLEAN FRAMEWORK ==="
+mvn clean
 
-mvn clean install
+echo "=== PACKAGE FRAMEWORK ==="
+mvn package
 
-if [ $? -ne 0 ]; then
-    echo "Framework build failed"
-    exit 1
-fi
+echo "=== INSTALL INTO MAVEN LOCAL REPO ==="
+mvn install
 
-echo "===== BUILD TEST PROJECT ====="
-
-cd ../test-fra_Me_work || exit
-mvn clean compile
-
-if [ $? -ne 0 ]; then
-    echo "Test build failed"
-    exit 1
-fi
-
-echo "===== DONE ====="
+echo "=== DONE ==="
+echo "Framework installé dans ~/.m2/repository"
