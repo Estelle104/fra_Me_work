@@ -1,6 +1,6 @@
 com/framework/annotation/Retention.class
 com/framework/annotation/CheckController.class
+com/framework/annotation/UrlMapping.class
 com/framework/servlet/FrontControllerServlet.class
 com/framework/util/Utilitaire.class
-com/framework/annotation/Url.class
 com/framework/annotation/Controller.class

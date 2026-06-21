@@ -1,6 +1,6 @@
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/util/Utilitaire.java
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/annotation/CheckController.java
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/annotation/Controller.java
-/home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/annotation/Url.java
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/servlet/FrontControllerServlet.java
+/home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/annotation/UrlMapping.java
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/annotation/Retention.java
