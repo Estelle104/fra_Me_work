@@ -22,31 +22,12 @@ public class FrontControllerServlet extends HttpServlet {
 
         try {
 
-            System.out.println("=== FRAMEWORK INIT ===");
-            System.out.println("############################");
-            System.out.println("VERSION FRAMEWORK 999999");
-            System.out.println("############################");
 
             ServletContext context = getServletContext();
 
             String pack = context.getInitParameter("controller");
 
-            System.out.println("Package = " + pack);
-
             List<Class<?>> classes = Utilitaire.getClasses(pack);
-
-            System.out.println("Nombre classes = "+ classes.size());
-
-            for (Class<?> c : classes) {
-
-                System.out.println("Classe trouvée = "+ c.getName());
-
-                System.out.println("Controller ? "+ c.isAnnotationPresent(com.framework.annotation.Controller.class));
-
-                if (c.isAnnotationPresent(com.framework.annotation.Controller.class)) {
-                    listController.add(c.getName());
-                }
-            }
 
             for (Class<?> c : classes) {
                 if (c.isAnnotationPresent(com.framework.annotation.Controller.class)) {
