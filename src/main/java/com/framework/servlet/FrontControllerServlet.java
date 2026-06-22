@@ -3,8 +3,10 @@ package com.framework.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import com.framework.util.Mapping;
 import com.framework.util.Utilitaire;
 
 import jakarta.servlet.http.HttpServlet;
@@ -15,6 +17,7 @@ import jakarta.servlet.ServletException;
 
 public class FrontControllerServlet extends HttpServlet {
     private List<String> listController = new ArrayList<>();
+    private HashMap<String, Mapping> urlMapping = new HashMap<>();
 
     @Override
     public void init() throws ServletException {
@@ -25,11 +28,11 @@ public class FrontControllerServlet extends HttpServlet {
 
             String pack = context.getInitParameter("controller");
 
-            List<Class<?>> classes = Utilitaire.getClasses(pack);
-
             Utilitaire.addInController(pack, listController);
 
             System.out.println("Controllers trouvés : " + listController.size());
+
+            this.urlMapping = Utilitaire.getUrlMapping(pack);
 
         } catch (Exception e) {
             throw new ServletException(e);
@@ -59,6 +62,14 @@ public class FrontControllerServlet extends HttpServlet {
 
         for (String string : listController) {
             out.println(string);
+        }
+
+        for (String urlKey : urlMapping.keySet()) {
+
+            Mapping map = urlMapping.get(urlKey);
+
+            out.println("URL: " + urlKey + " | Classe: "+ map.getClasse() + " | methode: " + map.getMethode());
+
         }
     }
 

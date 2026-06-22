@@ -1,10 +1,14 @@
 package com.framework.util;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import com.framework.annotation.UrlMapping;
 
 public class Utilitaire {
     public static List<Class<?>> getClasses(String packages) throws URISyntaxException, ClassNotFoundException {
@@ -54,5 +58,33 @@ public class Utilitaire {
                 controllers.add(c.getName());
             }
         }
+    }
+
+    public static HashMap<String, Mapping> getUrlMapping(String pack) throws Exception {
+        List<Class<?>> classes = getClasses(pack);
+        HashMap<String, Mapping> urlMapping = new HashMap<>();
+
+        for (Class<?> c : classes) {
+            if(c.isAnnotationPresent(com.framework.annotation.Controller.class)) {
+                Method[] methode = c.getDeclaredMethods();
+
+                for (Method m : methode){
+                    if(m.isAnnotationPresent(com.framework.annotation.UrlMapping.class)){
+                        UrlMapping url = m.getAnnotation(com.framework.annotation.UrlMapping.class);
+                        
+                        Mapping map = new Mapping();
+                        map.setClasse(c.getName());
+                        map.setMethode(m.getName());
+
+                        urlMapping.put(url.value(), map);
+                    }
+                    else {
+                        throw new Exception("La méthode " + m.getName() + " de la classe " + c.getName() + " n'est pas annotée avec @UrlMapping");
+                    }
+                }
+            }
+        }
+
+        return urlMapping;
     }
 }
