@@ -45,4 +45,14 @@ public class Utilitaire {
             }
         }   
     }
+
+    public static void addInController(String pack, List<String> controllers) throws Exception {
+        List<Class<?>> classes = getClasses(pack);
+        
+        for (Class<?> c : classes) {
+            if (c.isAnnotationPresent(com.framework.annotation.Controller.class)) {
+                controllers.add(c.getName());
+            }
+        }
+    }
 }
