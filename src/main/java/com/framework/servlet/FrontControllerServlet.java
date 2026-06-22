@@ -9,6 +9,34 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.ServletException;
 
 public class FrontControllerServlet extends HttpServlet {
+<<<<<<< Updated upstream
+=======
+    private List<String> listController = new ArrayList<>();
+
+    @Override
+    public void init() throws ServletException {
+
+        try {
+
+            ServletContext context = getServletContext();
+
+            String pack = context.getInitParameter("controller");
+
+            List<Class<?>> classes = Utilitaire.getClasses(pack);
+
+            for (Class<?> c : classes) {
+                if (c.isAnnotationPresent(com.framework.annotation.Controller.class)) {
+                    listController.add(c.getName());
+                }
+            }
+
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+
+    }
+
+>>>>>>> Stashed changes
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
