@@ -78,9 +78,9 @@ public class Utilitaire {
 
                         urlMapping.put(url.value(), map);
                     }
-                    else {
-                        throw new Exception("La méthode " + m.getName() + " de la classe " + c.getName() + " n'est pas annotée avec @UrlMapping");
-                    }
+                    // else {
+                    //     throw new Exception("La méthode " + m.getName() + " de la classe " + c.getName() + " n'est pas annotée avec @UrlMapping");
+                    // }
                 }
             }
         }
