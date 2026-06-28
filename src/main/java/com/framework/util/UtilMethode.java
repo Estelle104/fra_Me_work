@@ -1,6 +1,8 @@
 package com.framework.util;
 
-public class UrlMethode {
+import java.util.Objects;
+
+public class UtilMethode {
     String url;
     String methode;
 
@@ -10,11 +12,11 @@ public class UrlMethode {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof UrlMethode)) {
+        if (!(obj instanceof UtilMethode)) {
             return false;
         }
 
-        UrlMethode um = (UrlMethode) obj;
+        UtilMethode um = (UtilMethode) obj;
         
         return url.equals(um.getUrl()) && methode.equals(um.getMethode()); 
     }
@@ -22,9 +24,7 @@ public class UrlMethode {
 
     @Override
     public int hashCode(){
-        
-
-        return 0;
+        return Objects.hash(url, methode.toUpperCase());
     }
 
     public String getUrl() {
