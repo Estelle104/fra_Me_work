@@ -6,7 +6,6 @@ public class UtilMethode {
     String url;
     String methode;
 
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -17,13 +16,12 @@ public class UtilMethode {
         }
 
         UtilMethode um = (UtilMethode) obj;
-        
-        return url.equals(um.getUrl()) && methode.equals(um.getMethode()); 
+
+        return url.equals(um.getUrl()) && methode.equals(um.getMethode());
     }
 
-
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return Objects.hash(url, methode.toUpperCase());
     }
 
@@ -41,5 +39,12 @@ public class UtilMethode {
 
     public void setMethode(String methode) {
         this.methode = methode;
+    }
+
+    @Override
+    public String toString() {
+        return methode +
+                " " +
+                url;
     }
 }
