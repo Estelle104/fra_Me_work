@@ -18,7 +18,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 
 public class FrontControllerServlet extends HttpServlet {
-    private List<String> listController = new ArrayList<>();
+    // private List<String> listController = new ArrayList<>();
     // private HashMap<String, Mapping> urlMapping = new HashMap<>();
     private HashMap<UtilMethode, Mapping> urlMapping = new HashMap<>();
 
@@ -31,12 +31,12 @@ public class FrontControllerServlet extends HttpServlet {
 
             String pack = context.getInitParameter("controller");
 
-            Utilitaire.addInController(pack, listController);
+            // Utilitaire.addInController(pack, listController);
 
-            System.out.println("Controllers trouvés : " + listController.size());
+            // System.out.println("Controllers trouvés : " + listController.size());
 
             // this.urlMapping = Utilitaire.getUrlMapping(pack);
-            this.urlMapping = Utilitaire.getUrlAndMethod(pack);
+            Utilitaire.getUrlAndMethod(pack,urlMapping);
 
         } catch (Exception e) {
             throw new ServletException(e);
@@ -67,12 +67,7 @@ public class FrontControllerServlet extends HttpServlet {
         Mapping map = urlMapping.get(cle);
 
         if (cle.getUrl().endsWith(".jsp")) {
-            request
-                    .getRequestDispatcher(
-                            cle.getUrl())
-                    .forward(
-                            request,
-                            response);
+            request.getRequestDispatcher(cle.getUrl()).forward(request,response);
             return;
         }
 
@@ -113,12 +108,12 @@ public class FrontControllerServlet extends HttpServlet {
         out.println("URL : " + cle.getUrl());
     }
 
-    public List<String> getListController() {
-        return listController;
-    }
+    // public List<String> getListController() {
+    //     return listController;
+    // }
 
-    public void setListController(List<String> listController) {
-        this.listController = listController;
-    }
+    // public void setListController(List<String> listController) {
+    //     this.listController = listController;
+    // }
 
 }

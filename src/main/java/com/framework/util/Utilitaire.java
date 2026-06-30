@@ -44,7 +44,6 @@ public class Utilitaire {
                 scan(pack + "." + file.getName(), file, classes);
             } else if (file.getName().endsWith(".class")) {
                 String className = pack + "." + file.getName().replace(".class", "");
-
                 classes.add(Class.forName(className));
             }
         }
@@ -89,11 +88,10 @@ public class Utilitaire {
         return urlMapping;
     }
 
-    public static HashMap<UtilMethode, Mapping> getUrlAndMethod(String pack) throws Exception {
+    public static void getUrlAndMethod(String pack, HashMap<UtilMethode,Mapping> urlMapping) throws Exception {
         
         List<Class<?>> classes = getClasses(pack);
-        HashMap<UtilMethode, Mapping> urlMapping = new HashMap<>();
-
+     
         for (Class<?> c : classes) {
             if (c.isAnnotationPresent(com.framework.annotation.Controller.class)) {
                 Method[] methode = c.getDeclaredMethods();
@@ -119,7 +117,6 @@ public class Utilitaire {
                 }
             }
         }
-        return urlMapping;
     }
 
 }
