@@ -99,18 +99,15 @@ public class FrontControllerServlet extends HttpServlet {
 
             Method methode = clazz.getDeclaredMethod(map.getMethode());
 
-            Object retour = methode.invoke(
-                    objet);
+            Object retour = methode.invoke(objet);
 
             out.println("Retour : " + retour);
 
         } catch (Exception e) {
-            throw new ServletException(
-                    e);
+            throw new ServletException(e);
         }
 
         out.println("Methode : " + request.getMethod());
-
         out.println("Classe: " + map.getClasse());
         out.println("Methode: " + map.getMethode());
         out.println("URL : " + cle.getUrl());

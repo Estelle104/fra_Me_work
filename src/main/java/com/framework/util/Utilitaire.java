@@ -89,8 +89,8 @@ public class Utilitaire {
         return urlMapping;
     }
 
-    public static HashMap<UtilMethode, Mapping> getUrlAndMethod(String pack)
-            throws Exception {
+    public static HashMap<UtilMethode, Mapping> getUrlAndMethod(String pack) throws Exception {
+        
         List<Class<?>> classes = getClasses(pack);
         HashMap<UtilMethode, Mapping> urlMapping = new HashMap<>();
 
@@ -111,9 +111,7 @@ public class Utilitaire {
                         map.setMethode(m.getName());
 
                         if (urlMapping.containsKey(utilMethode)) {
-                            throw new Exception(
-                                    "Route deja definie : "+ url.value()+ 
-                                    " "+ url.method());
+                            throw new Exception("Route deja definie : "+ url.value()+ " "+ url.method());
                         }
 
                         urlMapping.put(utilMethode, map);
