@@ -88,3 +88,9 @@ But : ON doit savoir tous les controllers
     - mettre une variable dans web.xml  pour mettre les classes dans un package ( a demander sur google )
 
 - on aura une classe utilitaire pour mettre les fonctions utilitaire pour eviter de tout ecrire dans init
+
+
+#
+listener : associe  a un event -> quand cet evenement est appele -> listener est appelle
+
+filter

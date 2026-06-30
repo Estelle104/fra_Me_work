@@ -3,6 +3,7 @@ package com.framework.util;
 public class Mapping {
     String classe;
     String methode;
+    
     public String getClasse() {
         return classe;
     }

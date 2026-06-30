@@ -18,7 +18,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 
 public class FrontControllerServlet extends HttpServlet {
-    private List<String> listController = new ArrayList<>();
+    // private List<String> listController = new ArrayList<>();
     // private HashMap<String, Mapping> urlMapping = new HashMap<>();
     private HashMap<UtilMethode, Mapping> urlMapping = new HashMap<>();
 
@@ -31,12 +31,12 @@ public class FrontControllerServlet extends HttpServlet {
 
             String pack = context.getInitParameter("controller");
 
-            Utilitaire.addInController(pack, listController);
+            // Utilitaire.addInController(pack, listController);
 
-            System.out.println("Controllers trouvés : " + listController.size());
+            // System.out.println("Controllers trouvés : " + listController.size());
 
             // this.urlMapping = Utilitaire.getUrlMapping(pack);
-            this.urlMapping = Utilitaire.getUrlAndMethod(pack);
+            Utilitaire.getUrlAndMethod(pack,urlMapping);
 
         } catch (Exception e) {
             throw new ServletException(e);
@@ -56,43 +56,35 @@ public class FrontControllerServlet extends HttpServlet {
         processRequest(request, response);
     }
 
-    // private void processRequest(HttpServletRequest request, HttpServletResponse
-    // response)
-    // throws ServletException, IOException {
-    // PrintWriter out = response.getWriter();
-
-    // String url = request.getRequestURI();
-
-    // out.println(url);
-
-    // for (String string : listController) {
-    // out.println(string);
-    // }
-
-    // for (UtilMethode urlKey : urlMapping.keySet()) {
-
-    // Mapping map = urlMapping.get(urlKey);
-
-    // out.println("URL: " + urlKey + " | Classe: "+ map.getClasse() + " | methode:
-    // " + map.getMethode());
-
-    // }
-    // }
-    
     private void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         PrintWriter out = response.getWriter();
-        
+
         UtilMethode cle = new UtilMethode();
         cle.setUrl(request.getRequestURI().replace(request.getContextPath(), ""));
         cle.setMethode(request.getMethod());
-        
+
         Mapping map = urlMapping.get(cle);
-        
-                if (map == null) {
-                    out.println("404");
-                    return;
-                }
+
+        if (cle.getUrl().endsWith(".jsp")) {
+            request.getRequestDispatcher(cle.getUrl()).forward(request,response);
+            return;
+        }
+
+        if (map == null) {
+            out.println("Route introuvable");
+
+            out.println("<br>URL = " + cle.getUrl());
+            out.println("<br>METHODE = " + cle.getMethode());
+
+            out.println("<br><br>Routes disponibles :");
+
+            for (UtilMethode k : urlMapping.keySet()) {
+                out.println("<br>" + k.getMethode() + " " + k.getUrl());
+            }
+
+            return;
+        }
 
         try {
 
@@ -102,33 +94,26 @@ public class FrontControllerServlet extends HttpServlet {
 
             Method methode = clazz.getDeclaredMethod(map.getMethode());
 
-            Object retour = methode.invoke(
-                    objet);
+            Object retour = methode.invoke(objet);
 
-            out.println("Retour : "+ retour);
+            out.println("Retour : " + retour);
 
         } catch (Exception e) {
-            throw new ServletException(
-                    e);
+            throw new ServletException(e);
         }
 
-        for (UtilMethode k : urlMapping.keySet()) {
-            out.println("Map -> "+ k);
-        }
-
-        out.println("Methode : "+ request.getMethod());
-
+        out.println("Methode : " + request.getMethod());
         out.println("Classe: " + map.getClasse());
         out.println("Methode: " + map.getMethode());
         out.println("URL : " + cle.getUrl());
     }
 
-    public List<String> getListController() {
-        return listController;
-    }
+    // public List<String> getListController() {
+    //     return listController;
+    // }
 
-    public void setListController(List<String> listController) {
-        this.listController = listController;
-    }
+    // public void setListController(List<String> listController) {
+    //     this.listController = listController;
+    // }
 
 }
