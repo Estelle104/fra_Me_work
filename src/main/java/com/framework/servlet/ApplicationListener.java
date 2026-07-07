@@ -25,6 +25,12 @@ public class ApplicationListener implements ServletContextListener {
 
             Utilitaire.getUrlAndMethod(pack, urlMapping);
 
+            context.setAttribute("viewPrefix",
+                    context.getInitParameter("viewPrefix"));
+
+            context.setAttribute("viewSuffix",
+                    context.getInitParameter("viewSuffix"));
+                    
             context.setAttribute("urlMapping", urlMapping);
 
             System.out.println("Framework initialise");
