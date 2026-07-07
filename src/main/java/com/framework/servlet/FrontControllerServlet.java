@@ -18,31 +18,6 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 
 public class FrontControllerServlet extends HttpServlet {
-    // private List<String> listController = new ArrayList<>();
-    // private HashMap<String, Mapping> urlMapping = new HashMap<>();
-    private HashMap<UtilMethode, Mapping> urlMapping = new HashMap<>();
-
-    @Override
-    public void init() throws ServletException {
-
-        try {
-
-            ServletContext context = getServletContext();
-
-            String pack = context.getInitParameter("controller");
-
-            // Utilitaire.addInController(pack, listController);
-
-            // System.out.println("Controllers trouvés : " + listController.size());
-
-            // this.urlMapping = Utilitaire.getUrlMapping(pack);
-            Utilitaire.getUrlAndMethod(pack,urlMapping);
-
-        } catch (Exception e) {
-            throw new ServletException(e);
-        }
-
-    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -64,10 +39,14 @@ public class FrontControllerServlet extends HttpServlet {
         cle.setUrl(request.getRequestURI().replace(request.getContextPath(), ""));
         cle.setMethode(request.getMethod());
 
-        Mapping map = urlMapping.get(cle);
+        ServletContext context = getServletContext();
 
+        HashMap<UtilMethode, Mapping> urlMapping = (HashMap<UtilMethode, Mapping>) context.getAttribute("urlMapping");
+
+        Mapping map = urlMapping.get(cle);
+        
         if (cle.getUrl().endsWith(".jsp")) {
-            request.getRequestDispatcher(cle.getUrl()).forward(request,response);
+            request.getRequestDispatcher(cle.getUrl()).forward(request, response);
             return;
         }
 
@@ -109,11 +88,11 @@ public class FrontControllerServlet extends HttpServlet {
     }
 
     // public List<String> getListController() {
-    //     return listController;
+    // return listController;
     // }
 
     // public void setListController(List<String> listController) {
-    //     this.listController = listController;
+    // this.listController = listController;
     // }
 
 }
