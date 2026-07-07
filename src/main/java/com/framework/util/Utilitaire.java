@@ -10,6 +10,8 @@ import java.util.List;
 
 import com.framework.annotation.UrlMapping;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public class Utilitaire {
     public static List<Class<?>> getClasses(String packages) throws URISyntaxException, ClassNotFoundException {
         List<Class<?>> classes = new ArrayList<>();
@@ -88,10 +90,10 @@ public class Utilitaire {
         return urlMapping;
     }
 
-    public static void getUrlAndMethod(String pack, HashMap<UtilMethode,Mapping> urlMapping) throws Exception {
-        
+    public static void getUrlAndMethod(String pack, HashMap<UtilMethode, Mapping> urlMapping) throws Exception {
+
         List<Class<?>> classes = getClasses(pack);
-     
+
         for (Class<?> c : classes) {
             if (c.isAnnotationPresent(com.framework.annotation.Controller.class)) {
                 Method[] methode = c.getDeclaredMethods();
@@ -109,7 +111,7 @@ public class Utilitaire {
                         map.setMethode(m.getName());
 
                         if (urlMapping.containsKey(utilMethode)) {
-                            throw new Exception("Route deja definie : "+ url.value()+ " "+ url.method());
+                            throw new Exception("Route deja definie : " + url.value() + " " + url.method());
                         }
 
                         urlMapping.put(utilMethode, map);
@@ -119,10 +121,31 @@ public class Utilitaire {
         }
     }
 
+    public static String detectVue(Object retour, String prefixe, String suffixe) {
+        if (retour == null) {
+            return null;
+        }
+        if (retour instanceof String) {
+            return prefixe + (String) retour + suffixe;
+        }
+
+        if (retour instanceof ModelView) {
+            ModelView mv = (ModelView) retour;
+            return prefixe + mv.getView() + suffixe;
+        }
+
+        return null;
+    }
+
+    public static void addAttribute(HttpServletRequest request, ModelView mv) {
+
+        for (HashMap.Entry<String, Object> entry : mv.getAttribute().entrySet()) {
+            request.setAttribute(entry.getKey(), entry.getValue());
+        }
+
+    }
+
 }
-
-
-
 
 // Manao Katsaka
 // Mamita sprint 3

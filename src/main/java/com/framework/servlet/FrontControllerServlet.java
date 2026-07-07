@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.framework.util.Mapping;
+import com.framework.util.ModelView;
 import com.framework.util.UtilMethode;
 import com.framework.util.Utilitaire;
 
@@ -43,12 +44,16 @@ public class FrontControllerServlet extends HttpServlet {
 
         HashMap<UtilMethode, Mapping> urlMapping = (HashMap<UtilMethode, Mapping>) context.getAttribute("urlMapping");
 
-        Mapping map = urlMapping.get(cle);
-        
-        if (cle.getUrl().endsWith(".jsp")) {
-            request.getRequestDispatcher(cle.getUrl()).forward(request, response);
-            return;
+        if (urlMapping == null) {
+            throw new ServletException("urlMapping non initialise");
         }
+
+        Mapping map = urlMapping.get(cle);
+
+        // if (cle.getUrl().endsWith(".jsp")) {
+        // request.getRequestDispatcher(cle.getUrl()).forward(request, response);
+        // return;
+        // }
 
         if (map == null) {
             out.println("Route introuvable");
@@ -75,6 +80,22 @@ public class FrontControllerServlet extends HttpServlet {
 
             Object retour = methode.invoke(objet);
 
+            String prefixe = (String) context.getAttribute("viewPrefix");
+            String suffixe = (String) context.getAttribute("viewSuffix");
+
+            String vue = Utilitaire.detectVue(retour, prefixe, suffixe);
+
+            if (retour instanceof ModelView) {
+                ModelView mv = (ModelView) retour;
+                Utilitaire.addAttribute(request, mv);
+
+            }
+
+            if (vue != null) {
+                request.getRequestDispatcher(vue).forward(request, response);
+                return;
+            }
+
             out.println("Retour : " + retour);
 
         } catch (Exception e) {
@@ -86,13 +107,5 @@ public class FrontControllerServlet extends HttpServlet {
         out.println("Methode: " + map.getMethode());
         out.println("URL : " + cle.getUrl());
     }
-
-    // public List<String> getListController() {
-    // return listController;
-    // }
-
-    // public void setListController(List<String> listController) {
-    // this.listController = listController;
-    // }
 
 }
