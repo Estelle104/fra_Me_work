@@ -10,6 +10,8 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
 public class ApplicationListener implements ServletContextListener {
 
     @Override
@@ -17,9 +19,15 @@ public class ApplicationListener implements ServletContextListener {
 
         try {
 
+            AnnotationConfigApplicationContext spring = new AnnotationConfigApplicationContext();
+
             ServletContext context = sce.getServletContext();
 
             String pack = context.getInitParameter("controller");
+
+            spring.scan(pack);
+
+            spring.refresh();
 
             HashMap<UtilMethode, Mapping> urlMapping = new HashMap<>();
 
@@ -30,8 +38,10 @@ public class ApplicationListener implements ServletContextListener {
 
             context.setAttribute("viewSuffix",
                     context.getInitParameter("viewSuffix"));
-                    
+
             context.setAttribute("urlMapping", urlMapping);
+
+            context.setAttribute("springContext", spring);
 
             System.out.println("Framework initialise");
 
