@@ -18,6 +18,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 
+import org.springframework.context.ApplicationContext;
+
 public class FrontControllerServlet extends HttpServlet {
 
     @Override
@@ -74,7 +76,11 @@ public class FrontControllerServlet extends HttpServlet {
 
             Class<?> clazz = Class.forName(map.getClasse());
 
-            Object objet = clazz.getDeclaredConstructor().newInstance();
+            // Object objet = clazz.getDeclaredConstructor().newInstance();
+
+            ApplicationContext spring = (ApplicationContext) context.getAttribute("springContext");
+
+            Object objet = spring.getBean(clazz);
 
             Method methode = clazz.getDeclaredMethod(map.getMethode());
 
