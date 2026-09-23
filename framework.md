@@ -94,3 +94,8 @@ But : ON doit savoir tous les controllers
 listener : associe  a un event -> quand cet evenement est appele -> listener est appelle
 
 filter
+'
+
+# Sprint 6
+Objectif : 
+    - le developpeur doit pouvoir appeller des api et retourner des json 
