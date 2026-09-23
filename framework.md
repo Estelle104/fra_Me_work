@@ -93,4 +93,5 @@ But : ON doit savoir tous les controllers
 #
 listener : associe  a un event -> quand cet evenement est appele -> listener est appelle
 
-filter
+Manampy annotation iray 
+Tsy mandeha vue fa json
