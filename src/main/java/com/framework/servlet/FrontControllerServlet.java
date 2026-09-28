@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.framework.annotation.Json;
 import com.framework.util.Mapping;
 import com.framework.util.ModelView;
 import com.framework.util.UtilMethode;
@@ -86,6 +87,21 @@ public class FrontControllerServlet extends HttpServlet {
 
             Object retour = methode.invoke(objet);
 
+            if (methode.isAnnotationPresent(Json.class)) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+
+                String json;
+                if (retour instanceof ModelView) {
+                    json = Utilitaire.toJson(((ModelView) retour).getAttribute());
+                } else {
+                    json = Utilitaire.toJson(retour);
+                }
+
+                response.getWriter().print(json);
+                return;
+            }
+
             String prefixe = (String) context.getAttribute("viewPrefix");
             String suffixe = (String) context.getAttribute("viewSuffix");
 
@@ -94,7 +110,6 @@ public class FrontControllerServlet extends HttpServlet {
             if (retour instanceof ModelView) {
                 ModelView mv = (ModelView) retour;
                 Utilitaire.addAttribute(request, mv);
-
             }
 
             if (vue != null) {
