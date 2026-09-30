@@ -1,6 +1,7 @@
 com/framework/listener/ApplicationListener.class
 com/framework/servlet/FrontControllerServlet.class
 com/framework/util/ModelView.class
+com/framework/annotation/Json.class
 com/framework/annotation/UrlMapping.class
 com/framework/util/Utilitaire.class
 com/framework/util/UtilMethode.class

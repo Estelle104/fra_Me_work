@@ -8,11 +8,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gson.Gson;
+
 import com.framework.annotation.UrlMapping;
+import com.framework.util.Mapping;
+
+
 
 import jakarta.servlet.http.HttpServletRequest;
 
 public class Utilitaire {
+    private static final Gson GSON = new Gson();
     public static List<Class<?>> getClasses(String packages) throws URISyntaxException, ClassNotFoundException {
         List<Class<?>> classes = new ArrayList<>();
 
@@ -145,10 +151,9 @@ public class Utilitaire {
 
     }
 
-}
+    // dans Utilitaire
 
-// Manao Katsaka
-// Mamita sprint 3
-// Manao verification code
-// Manohy boky
-// Manomana SIG expose
+    public static String toJson(Object o) {
+        return GSON.toJson(o);
+    }
+}
