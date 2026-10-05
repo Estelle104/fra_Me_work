@@ -3,15 +3,15 @@ package com.framework.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.lang.reflect.Parameter;
 
 import com.framework.annotation.Json;
 import com.framework.util.Mapping;
 import com.framework.util.ModelView;
 import com.framework.util.UtilMethode;
 import com.framework.util.Utilitaire;
+import com.framework.annotation.Param;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +37,7 @@ public class FrontControllerServlet extends HttpServlet {
 
     private void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         PrintWriter out = response.getWriter();
 
         UtilMethode cle = new UtilMethode();
@@ -83,9 +84,81 @@ public class FrontControllerServlet extends HttpServlet {
 
             Object objet = spring.getBean(clazz);
 
-            Method methode = clazz.getDeclaredMethod(map.getMethode());
+            Method methode = null;
+            Object retour;
 
-            Object retour = methode.invoke(objet);
+            // Cherche une méthode sans paramètre.
+            try {
+
+                methode = clazz.getDeclaredMethod(map.getMethode());
+
+                // Méthode sans paramètre
+                retour = methode.invoke(objet);
+
+            } catch (NoSuchMethodException e) {
+
+                // on cherche une méthode avec des paramètres.
+                methode = null;
+
+                for (Method m : clazz.getDeclaredMethods()) {
+
+                    if (!m.getName().equals(map.getMethode())) {
+                        continue;
+                    }
+
+                    Parameter[] parameters = m.getParameters();
+
+                    boolean hasParamAnnotation = false;
+
+                    for (Parameter parameter : parameters) {
+
+                        if (parameter.isAnnotationPresent(Param.class)) {
+                            hasParamAnnotation = true;
+                            break;
+                        }
+                    }
+
+                    if (hasParamAnnotation) {
+                        methode = m;
+                        break;
+                    }
+                }
+
+                if (methode == null) {
+                    throw new ServletException(
+                            "Méthode introuvable : " + map.getMethode());
+                }
+
+                // Récupération des paramètres
+                Parameter[] parameters = methode.getParameters();
+
+                Object[] valeurs = new Object[parameters.length];
+
+                for (int i = 0; i < parameters.length; i++) {
+
+                    Parameter parameter = parameters[i];
+
+                    if (parameter.isAnnotationPresent(Param.class)) {
+
+                        Param param = parameter.getAnnotation(Param.class);
+
+                        String nomParam = param.value();
+
+                        String valParam = request.getParameter(nomParam);
+
+                        valeurs[i] = Utilitaire.convertirParametre(valParam,parameter.getType());
+
+                    } else {
+
+                        throw new ServletException(
+                                "Le paramètre '" + parameter.getName()
+                                        + "' doit avoir l'annotation @Param");
+                    }
+                }
+
+                // Appel de la méthode avec les valeurs récupérées
+                retour = methode.invoke(objet, valeurs);
+            }
 
             if (methode.isAnnotationPresent(Json.class)) {
                 response.setContentType("application/json");

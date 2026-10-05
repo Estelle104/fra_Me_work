@@ -13,12 +13,11 @@ import com.google.gson.Gson;
 import com.framework.annotation.UrlMapping;
 import com.framework.util.Mapping;
 
-
-
 import jakarta.servlet.http.HttpServletRequest;
 
 public class Utilitaire {
     private static final Gson GSON = new Gson();
+
     public static List<Class<?>> getClasses(String packages) throws URISyntaxException, ClassNotFoundException {
         List<Class<?>> classes = new ArrayList<>();
 
@@ -155,5 +154,47 @@ public class Utilitaire {
 
     public static String toJson(Object o) {
         return GSON.toJson(o);
+    }
+
+    public static Object convertirParametre(String valeur, Class<?> type) {
+
+        if (type == String.class) {
+            return valeur;
+        }
+
+        if (type == int.class || type == Integer.class) {
+            return Integer.parseInt(valeur);
+        }
+
+        if (type == long.class || type == Long.class) {
+            return Long.parseLong(valeur);
+        }
+
+        if (type == double.class || type == Double.class) {
+            return Double.parseDouble(valeur);
+        }
+
+        if (type == float.class || type == Float.class) {
+            return Float.parseFloat(valeur);
+        }
+
+        if (type == boolean.class || type == Boolean.class) {
+            return Boolean.parseBoolean(valeur);
+        }
+
+        if (type == short.class || type == Short.class) {
+            return Short.parseShort(valeur);
+        }
+
+        if (type == byte.class || type == Byte.class) {
+            return Byte.parseByte(valeur);
+        }
+
+        if (type == char.class || type == Character.class) {
+            return valeur.charAt(0);
+        }
+
+        throw new IllegalArgumentException(
+                "Type non supporté pour @Param : " + type.getName());
     }
 }
