@@ -9,6 +9,7 @@ import java.lang.reflect.Parameter;
 import com.framework.annotation.Json;
 import com.framework.util.Mapping;
 import com.framework.util.ModelView;
+import com.framework.util.ParamBinder;
 import com.framework.util.UtilMethode;
 import com.framework.util.Utilitaire;
 import com.framework.annotation.Param;
@@ -97,7 +98,7 @@ public class FrontControllerServlet extends HttpServlet {
 
             } catch (NoSuchMethodException e) {
 
-                // on cherche une méthode avec des paramètres.
+                // méthode avec  paramètres.
                 methode = null;
 
                 for (Method m : clazz.getDeclaredMethods()) {
@@ -129,34 +130,35 @@ public class FrontControllerServlet extends HttpServlet {
                             "Méthode introuvable : " + map.getMethode());
                 }
 
-                // Récupération des paramètres
+                // Récupération des paramètres du Controller
                 Parameter[] parameters = methode.getParameters();
 
                 Object[] valeurs = new Object[parameters.length];
+
+                // Création du binder
+                ParamBinder binder = new ParamBinder();
 
                 for (int i = 0; i < parameters.length; i++) {
 
                     Parameter parameter = parameters[i];
 
-                    if (parameter.isAnnotationPresent(Param.class)) {
-
-                        Param param = parameter.getAnnotation(Param.class);
-
-                        String nomParam = param.value();
-
-                        String valParam = request.getParameter(nomParam);
-
-                        valeurs[i] = Utilitaire.convertirParametre(valParam,parameter.getType());
-
-                    } else {
+                    // Chaque paramètre doit avoir @Param
+                    if (!parameter.isAnnotationPresent(Param.class)) {
 
                         throw new ServletException(
-                                "Le paramètre '" + parameter.getName()
-                                        + "' doit avoir l'annotation @Param");
+                                "Le paramètre '" + parameter.getName() + "' doit avoir l'annotation @Param");
                     }
+
+                    // Lecture de l'annotation
+                    Param param = parameter.getAnnotation(Param.class);
+
+                    String nomParam = param.value();
+
+                    // Construction de la valeur selon le type Java
+                    valeurs[i] = binder.resoudre(request,nomParam,parameter);
                 }
 
-                // Appel de la méthode avec les valeurs récupérées
+                // Appel du Controller avec les arguments construits
                 retour = methode.invoke(objet, valeurs);
             }
 
