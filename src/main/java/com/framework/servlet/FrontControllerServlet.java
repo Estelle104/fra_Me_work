@@ -98,7 +98,7 @@ public class FrontControllerServlet extends HttpServlet {
 
             } catch (NoSuchMethodException e) {
 
-                // on cherche une méthode avec des paramètres.
+                // méthode avec  paramètres.
                 methode = null;
 
                 for (Method m : clazz.getDeclaredMethods()) {
@@ -130,36 +130,6 @@ public class FrontControllerServlet extends HttpServlet {
                             "Méthode introuvable : " + map.getMethode());
                 }
 
-                // // Récupération des paramètres
-                // Parameter[] parameters = methode.getParameters();
-
-                // Object[] valeurs = new Object[parameters.length];
-
-                // for (int i = 0; i < parameters.length; i++) {
-
-                // Parameter parameter = parameters[i];
-
-                // if (parameter.isAnnotationPresent(Param.class)) {
-
-                // Param param = parameter.getAnnotation(Param.class);
-
-                // String nomParam = param.value();
-
-                // String valParam = request.getParameter(nomParam);
-
-                // valeurs[i] = Utilitaire.convertirParametre(valParam,parameter.getType());
-
-                // } else {
-
-                // throw new ServletException(
-                // "Le paramètre '" + parameter.getName()
-                // + "' doit avoir l'annotation @Param");
-                // }
-                // }
-
-                // // Appel de la méthode avec les valeurs récupérées
-                // retour = methode.invoke(objet, valeurs);
-
                 // Récupération des paramètres du Controller
                 Parameter[] parameters = methode.getParameters();
 
@@ -176,8 +146,7 @@ public class FrontControllerServlet extends HttpServlet {
                     if (!parameter.isAnnotationPresent(Param.class)) {
 
                         throw new ServletException(
-                                "Le paramètre '" + parameter.getName()
-                                        + "' doit avoir l'annotation @Param");
+                                "Le paramètre '" + parameter.getName() + "' doit avoir l'annotation @Param");
                     }
 
                     // Lecture de l'annotation
@@ -186,10 +155,7 @@ public class FrontControllerServlet extends HttpServlet {
                     String nomParam = param.value();
 
                     // Construction de la valeur selon le type Java
-                    valeurs[i] = binder.resoudre(
-                            request,
-                            nomParam,
-                            parameter);
+                    valeurs[i] = binder.resoudre(request,nomParam,parameter);
                 }
 
                 // Appel du Controller avec les arguments construits

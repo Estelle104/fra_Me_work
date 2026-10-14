@@ -17,15 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class ParamBinder {
 
-    /**
-     * Point d'entrée du binder.
-     *
-     * Exemple :
-     * @Param("etudiant") Etudiant etudiant
-     *
-     * prefixe = "etudiant"
-     * parametre = le paramètre Java de la méthode du Controller
-     */
+    
     public Object resoudre( HttpServletRequest request,String prefixe,java.lang.reflect.Parameter parametre) throws Exception {
 
         return construireValeur(request,prefixe,parametre.getType(),parametre.getParameterizedType()
@@ -51,7 +43,7 @@ public class ParamBinder {
             );
         }
 
-        // Liste : List<String>, List<Etudiant>, etc.
+        // Liste 
         if (List.class.isAssignableFrom(type)) {
             if (!(typeGenerique instanceof ParameterizedType)) {
                 throw new IllegalArgumentException(
