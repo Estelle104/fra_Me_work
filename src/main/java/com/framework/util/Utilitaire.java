@@ -156,12 +156,27 @@ public class Utilitaire {
         return GSON.toJson(o);
     }
 
+    // convertir un param en fonction de son type
     public static Object convertirParametre(String valeur, Class<?> type) {
 
+        // Cas d'une valeur absente
+        if (valeur == null) {
+
+            if (type.isPrimitive()) {
+                throw new IllegalArgumentException(
+                        "Impossible d'affecter null au type primitif : "
+                                + type.getName());
+            }
+
+            return null;
+        }
+
+        // Chaîne de caractères
         if (type == String.class) {
             return valeur;
         }
 
+        // Types numériques
         if (type == int.class || type == Integer.class) {
             return Integer.parseInt(valeur);
         }
@@ -178,10 +193,6 @@ public class Utilitaire {
             return Float.parseFloat(valeur);
         }
 
-        if (type == boolean.class || type == Boolean.class) {
-            return Boolean.parseBoolean(valeur);
-        }
-
         if (type == short.class || type == Short.class) {
             return Short.parseShort(valeur);
         }
@@ -190,11 +201,44 @@ public class Utilitaire {
             return Byte.parseByte(valeur);
         }
 
+        // Type bool
+        if (type == boolean.class || type == Boolean.class) {
+            if (!valeur.equalsIgnoreCase("true") && !valeur.equalsIgnoreCase("false")) {
+                throw new IllegalArgumentException( "Valeur bool invalide : " + valeur);
+            }
+            return Boolean.parseBoolean(valeur);
+        }
+
+        // caractere
         if (type == char.class || type == Character.class) {
+            if (valeur.length() != 1) {
+                throw new IllegalArgumentException( "Un caractère est attendu, valeur reçue : " + valeur);
+            }
             return valeur.charAt(0);
         }
 
-        throw new IllegalArgumentException(
-                "Type non supporté pour @Param : " + type.getName());
+        // Enum
+        if (type.isEnum()) {
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            Object resultat = Enum.valueOf((Class<? extends Enum>) type, valeur);
+
+            return resultat;
+        }
+
+        throw new IllegalArgumentException( "Type simple non supporté : " + type.getName());
+    }
+
+    public static boolean estTypeSimple(Class<?> type) {
+
+        return type == String.class
+                || type == int.class || type == Integer.class
+                || type == long.class || type == Long.class
+                || type == double.class || type == Double.class
+                || type == float.class || type == Float.class
+                || type == boolean.class || type == Boolean.class
+                || type == short.class || type == Short.class
+                || type == byte.class || type == Byte.class
+                || type == char.class || type == Character.class
+                || type.isEnum();
     }
 }
