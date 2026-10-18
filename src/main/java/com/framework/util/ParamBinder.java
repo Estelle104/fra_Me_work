@@ -1,5 +1,6 @@
 package com.framework.util;
 
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
@@ -13,23 +14,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import com.framework.upload.UploadedFile;
+
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
 public class ParamBinder {
 
-    
-    public Object resoudre( HttpServletRequest request,String prefixe,java.lang.reflect.Parameter parametre) throws Exception {
+    public Object resoudre(HttpServletRequest request, String prefixe, java.lang.reflect.Parameter parametre)
+            throws Exception {
 
-        return construireValeur(request,prefixe,parametre.getType(),parametre.getParameterizedType()
-        );
+        return construireValeur(request, prefixe, parametre.getType(), parametre.getParameterizedType());
     }
 
     /**
      * Construit une valeur en fonction du type attendu.
      */
-    private Object construireValeur(HttpServletRequest request,String prefixe,Class<?> type, Type typeGenerique) throws Exception {
+    private Object construireValeur(HttpServletRequest request, String prefixe, Class<?> type, Type typeGenerique)
+            throws Exception {
 
-        // Type simple 
+        if (type == UploadedFile.class) {
+            return construireFichier(request, prefixe);
+        }
+
+        // Type simple
         if (Utilitaire.estTypeSimple(type)) {
             String valeur = request.getParameter(prefixe);
 
@@ -39,31 +47,55 @@ public class ParamBinder {
         // Tableau : non pris en charge pour le moment.
         if (type.isArray() || typeGenerique instanceof GenericArrayType) {
             throw new IllegalArgumentException(
-                    "Les tableaux ne sont pas encore pris en charge : " + type.getName()
-            );
+                    "Les tableaux ne sont pas encore pris en charge : " + type.getName());
         }
 
-        // Liste 
+        // Liste
         if (List.class.isAssignableFrom(type)) {
             if (!(typeGenerique instanceof ParameterizedType)) {
                 throw new IllegalArgumentException(
-                        "Le type de la liste doit être précisé : " + prefixe + ". Utilise par exemple List<Etudiant>."
-                );
+                        "Le type de la liste doit être précisé : " + prefixe + ". Utilise par exemple List<Etudiant>.");
             }
 
             ParameterizedType paramType = (ParameterizedType) typeGenerique;
 
             Type typeElement = paramType.getActualTypeArguments()[0];
 
-            return construireListe(request,prefixe, typeElement);
+            return construireListe(request, prefixe, typeElement);
         }
 
         // Objet Java : Etudiant, Personne, Adresse...
-        return construireObjet(request,prefixe,type);
+        return construireObjet(request, prefixe, type);
     }
 
-    //  Construit une liste à partir des indices reçus.
-    private List<Object> construireListe(HttpServletRequest request,String prefixe, Type typeElement) throws Exception {
+    private UploadedFile construireFichier(HttpServletRequest request,String nomParametre) throws Exception {
+
+        // Récupérer le fichier dont le nom correspond au paramètre
+        Part part = request.getPart(nomParametre);
+
+        // Aucun fichier sélectionné
+        if (part == null || part.getSubmittedFileName() == null || part.getSubmittedFileName().isBlank()) {
+            return null;
+        }
+
+        // Récupérer uniquement le nom du fichier
+        String nom = part.getSubmittedFileName().replace('\\', '/');
+        nom = nom.substring(nom.lastIndexOf('/') + 1);
+
+        // Lire le contenu du fichier sous forme de byte[]
+        byte[] contenu;
+
+        try (InputStream input = part.getInputStream()) {
+            contenu = input.readAllBytes();
+        }
+
+        // Construire notre objet UploadedFile
+        return new UploadedFile(nom,part.getContentType(),contenu);
+    }
+
+    // Construit une liste à partir des indices reçus.
+    private List<Object> construireListe(HttpServletRequest request, String prefixe, Type typeElement)
+            throws Exception {
 
         Class<?> classeElement = obtenirClasse(typeElement);
 
@@ -85,21 +117,20 @@ public class ParamBinder {
                 continue;
             }
 
-            String indiceTexte =
-                    nom.substring(debut.length(), fin);
+            String indiceTexte = nom.substring(debut.length(), fin);
 
             try {
 
                 int indice = Integer.parseInt(indiceTexte);
 
                 if (indice < 0) {
-                    throw new IllegalArgumentException( "Indice de liste négatif : " + nom);
+                    throw new IllegalArgumentException("Indice de liste négatif : " + nom);
                 }
 
                 indices.add(indice);
 
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Indice de liste invalide : " + nom,e);
+                throw new IllegalArgumentException("Indice de liste invalide : " + nom, e);
             }
         }
 
@@ -114,15 +145,16 @@ public class ParamBinder {
 
         for (int indice : indices) {
             if (indice != attendu) {
-                throw new IllegalArgumentException("Indices de liste discontinus pour "+ prefixe+ ". Indice attendu : "+ attendu);
+                throw new IllegalArgumentException(
+                        "Indices de liste discontinus pour " + prefixe + ". Indice attendu : " + attendu);
             }
             attendu++;
         }
 
         for (int indice : indices) {
-            String prefixeElement =prefixe + "[" + indice + "]";
+            String prefixeElement = prefixe + "[" + indice + "]";
 
-            Object element = construireValeur(request,prefixeElement,classeElement,typeElement);
+            Object element = construireValeur(request, prefixeElement, classeElement, typeElement);
 
             resultat.add(element);
         }
@@ -130,8 +162,7 @@ public class ParamBinder {
         return resultat;
     }
 
-    
-    //Det la classe d'un element de liste
+    // Det la classe d'un element de liste
     private Class<?> obtenirClasse(Type type) {
 
         if (type instanceof Class<?>) {
@@ -149,13 +180,11 @@ public class ParamBinder {
         }
 
         throw new IllegalArgumentException(
-                "Type générique non pris en charge : " + type.getTypeName()
-        );
+                "Type générique non pris en charge : " + type.getTypeName());
     }
 
-    
-    //Construit un objet et remplit ses proprietes.
-    private Object construireObjet(HttpServletRequest request,String prefixe,Class<?> type) throws Exception {
+    // Construit un objet et remplit ses proprietes.
+    private Object construireObjet(HttpServletRequest request, String prefixe, Class<?> type) throws Exception {
 
         if (!contientDonnees(request, prefixe)) {
             return null;
@@ -174,7 +203,7 @@ public class ParamBinder {
 
             String nomChamp = champ.getName();
 
-            String prefixeChamp =prefixe + "." + nomChamp;
+            String prefixeChamp = prefixe + "." + nomChamp;
 
             Class<?> typeChamp = champ.getType();
 
@@ -185,22 +214,21 @@ public class ParamBinder {
                 continue;
             }
 
-            Object valeur = construireValeur(request,prefixeChamp,typeChamp,typeGeneriqueChamp);
+            Object valeur = construireValeur(request, prefixeChamp, typeChamp, typeGeneriqueChamp);
 
             // N'affecte pas null à un champ primitif.
             if (valeur == null && typeChamp.isPrimitive()) {
                 continue;
             }
 
-            affecterPropriete(objet,champ,valeur);
+            affecterPropriete(objet, champ, valeur);
         }
 
         return objet;
     }
 
-    
-    //Récupère les champs déclarés dans la classe et dans ses classes parentes.
-    
+    // Récupère les champs déclarés dans la classe et dans ses classes parentes.
+
     private List<Field> obtenirChamps(Class<?> type) {
 
         List<Field> champs = new ArrayList<>();
@@ -217,27 +245,24 @@ public class ParamBinder {
         return champs;
     }
 
-    
     // Vérifie qu'une classe peut être instanciée.
     private void verifierTypeObjet(Class<?> type) {
 
         if (type.isInterface() || Modifier.isAbstract(type.getModifiers()) || type.isEnum()) {
             throw new IllegalArgumentException(
-                    "Impossible de construire automatiquement : " + type.getName()
-            );
+                    "Impossible de construire automatiquement : " + type.getName());
         }
 
         if (type.getName().startsWith("java.")) {
             throw new IllegalArgumentException(
-                    "Cette classe Java ne peut pas être construite "+ "comme objet de formulaire : " + type.getName()
-            );
+                    "Cette classe Java ne peut pas être construite " + "comme objet de formulaire : " + type.getName());
         }
     }
 
     // Vérifie si une donnée existe pour un préfixe.
-    private boolean contientDonnees(HttpServletRequest request,String prefixe) {
+    private boolean contientDonnees(HttpServletRequest request, String prefixe) {
 
-        Map<String, String[]> parametres =request.getParameterMap();
+        Map<String, String[]> parametres = request.getParameterMap();
 
         if (parametres.containsKey(prefixe)) {
             return true;
@@ -256,23 +281,24 @@ public class ParamBinder {
     }
 
     // Affecte une propriété à l'aide de son setter.
-    private void affecterPropriete(Object objet,Field champ,Object valeur) throws Exception {
+    private void affecterPropriete(Object objet, Field champ, Object valeur) throws Exception {
         String nomChamp = champ.getName();
 
-        String nomSetter ="set"+ Character.toUpperCase(nomChamp.charAt(0))+ nomChamp.substring(1);
+        String nomSetter = "set" + Character.toUpperCase(nomChamp.charAt(0)) + nomChamp.substring(1);
 
         Method setter = null;
 
         // Recherche du setter correspondant au type exact.
         try {
-            setter = objet.getClass().getMethod(nomSetter,champ.getType());
+            setter = objet.getClass().getMethod(nomSetter, champ.getType());
 
         } catch (NoSuchMethodException e) {
 
             // Recherche d'un setter compatible avec le type du champ
             throw new IllegalArgumentException(
-                    "Setter public introuvable : "+ objet.getClass().getName()+ "."+ nomSetter+ "("+ champ.getType().getSimpleName() + ")", e
-            );
+                    "Setter public introuvable : " + objet.getClass().getName() + "." + nomSetter + "("
+                            + champ.getType().getSimpleName() + ")",
+                    e);
         }
 
         try {
@@ -283,7 +309,8 @@ public class ParamBinder {
 
             Throwable cause = e.getCause();
 
-            throw new IllegalArgumentException("Erreur pendant l'affectation de la propriété "+ champ.getName(), cause);
+            throw new IllegalArgumentException("Erreur pendant l'affectation de la propriété " + champ.getName(),
+                    cause);
         }
     }
 }
