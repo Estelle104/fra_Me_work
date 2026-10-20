@@ -98,7 +98,7 @@ public class FrontControllerServlet extends HttpServlet {
 
             } catch (NoSuchMethodException e) {
 
-                // méthode avec  paramètres.
+                // méthode avec paramètres.
                 methode = null;
 
                 for (Method m : clazz.getDeclaredMethods()) {
@@ -155,11 +155,22 @@ public class FrontControllerServlet extends HttpServlet {
                     String nomParam = param.value();
 
                     // Construction de la valeur selon le type Java
-                    valeurs[i] = binder.resoudre(request,nomParam,parameter);
+                    valeurs[i] = binder.resoudre(request, nomParam, parameter);
                 }
 
-                // Appel du Controller avec les arguments construits
-                retour = methode.invoke(objet, valeurs);
+                try {
+                    retour = methode.invoke(objet, valeurs);
+
+                } catch (java.lang.reflect.InvocationTargetException ee) {
+
+                    Throwable cause = ee.getTargetException();
+
+                    System.err.println("===== ERREUR DANS LE CONTROLEUR =====");
+                    cause.printStackTrace();
+
+                    throw new ServletException("Erreur dans le contrôleur : " + cause.getMessage(),cause);
+                }
+
             }
 
             if (methode.isAnnotationPresent(Json.class)) {
