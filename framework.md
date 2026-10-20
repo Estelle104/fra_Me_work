@@ -102,3 +102,14 @@ Objectif :
 Manampy annotation iray 
 Tsy mandeha vue fa json
 
+
+# Sprint 9
+Session 
+- Faire en sorte que la session de l'user soit disponible dans le controller su developpeur
+    - Manamboatra classe Session(map<string,object>, string id) : misy methode mi-recupere sy manampy variable
+    - Apetraka am methode d'action ny Session -> afaka mi-manipuler azy
+    - Au moment de traitement de parametre: Raha misy Session -> creer une instance de Session : map remplit a partir de httpSession
+    - Rehefa vita invoke de atao mise a jour ny httpsession a partir de map
+    - Tsindrina amle nouvelle session  a jour ny httpSession
+    - Probleme : mila mamorona session foana a chaque fois
+    - But : pour chaque session : 1 seul instance de Session
