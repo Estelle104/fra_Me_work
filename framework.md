@@ -113,3 +113,10 @@ Session
     - Tsindrina amle nouvelle session  a jour ny httpSession
     - Probleme : mila mamorona session foana a chaque fois
     - But : pour chaque session : 1 seul instance de Session
+
+# Sprint 10
+- Il y a des methodes ou seuls les user connecte peuvent executer des fonctions
+-
+
+# Sprint 10=-bis
+- Manana role specifique vao afaka mi-executer fonction

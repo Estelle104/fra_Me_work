@@ -3,13 +3,16 @@ package com.framework.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.lang.reflect.Parameter;
 
 import com.framework.annotation.Json;
 import com.framework.util.Mapping;
 import com.framework.util.ModelView;
 import com.framework.util.ParamBinder;
+import com.framework.util.Session;
 import com.framework.util.UtilMethode;
 import com.framework.util.Utilitaire;
 import com.framework.annotation.Param;
@@ -17,6 +20,7 @@ import com.framework.annotation.Param;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 
@@ -157,6 +161,29 @@ public class FrontControllerServlet extends HttpServlet {
                     // Construction de la valeur selon le type Java
                     valeurs[i] = binder.resoudre(request, nomParam, parameter);
                 }
+                HttpSession httpSession = request.getSession();
+
+                Session session = (Session) httpSession.getAttribute("frameworkSession");
+
+                if (session == null) {
+
+                    Map<String, Object> variables = new HashMap<>();
+
+                    Enumeration<String> noms = httpSession.getAttributeNames();
+
+                    while (noms.hasMoreElements()) {
+
+                        String nom = noms.nextElement();
+
+                        if (!"frameworkSession".equals(nom)) {
+                            variables.put(nom, httpSession.getAttribute(nom));
+                        }
+                    }
+
+                    session = new Session(variables, httpSession.getId());
+
+                    httpSession.setAttribute("frameworkSession", session);
+                }
 
                 try {
                     retour = methode.invoke(objet, valeurs);
@@ -168,7 +195,7 @@ public class FrontControllerServlet extends HttpServlet {
                     System.err.println("===== ERREUR DANS LE CONTROLEUR =====");
                     cause.printStackTrace();
 
-                    throw new ServletException("Erreur dans le contrôleur : " + cause.getMessage(),cause);
+                    throw new ServletException("Erreur dans le contrôleur : " + cause.getMessage(), cause);
                 }
 
             }
