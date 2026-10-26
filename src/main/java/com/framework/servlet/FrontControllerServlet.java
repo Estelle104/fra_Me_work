@@ -98,7 +98,7 @@ public class FrontControllerServlet extends HttpServlet {
             Object objet = spring.getBean(clazz);
 
             // 4. Rechercher la méthode d'action
-            Method methode = trouverMethode(clazz, map.getMethode());
+            Method methode = Utilitaire.trouverMethode(clazz, map.getMethode());
 
             // 5. Récupérer les paramètres de la méthode
             Parameter[] parameters = methode.getParameters();
@@ -121,7 +121,7 @@ public class FrontControllerServlet extends HttpServlet {
             if (utiliseSession) {
                 httpSession = request.getSession();
 
-                session = recupererSession(httpSession);
+                session = Utilitaire.recupererSession(httpSession, SESSION_ATTRIBUTE);
             }
 
             // 7. Préparer les arguments de la méthode
@@ -165,7 +165,7 @@ public class FrontControllerServlet extends HttpServlet {
 
             // 9. Synchroniser Session vers HttpSession
             if (utiliseSession) {
-                synchroniserSession(session, httpSession);
+                Utilitaire.synchroniserSession(session, httpSession, SESSION_ATTRIBUTE);
             }
 
             // 10. Traiter les méthodes JSON
@@ -218,117 +218,4 @@ public class FrontControllerServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Recherche une méthode d'action compatible avec les paramètres
-     * pris en charge par le framework.
-     *
-     * Un paramètre doit être de type Session ou posséder @Param.
-     */
-    private Method trouverMethode(Class<?> clazz, String nomMethode) throws ServletException {
-
-        Method methodeSansParametre = null;
-
-        for (Method m : clazz.getDeclaredMethods()) {
-            if (!m.getName().equals(nomMethode)) {
-                continue;
-            }
-
-            Parameter[] parameters = m.getParameters();
-
-            // Priorité à la méthode sans paramètre
-            if (parameters.length == 0) {
-
-                methodeSansParametre = m;
-                continue;
-            }
-
-            boolean methodeValide = true;
-
-            for (Parameter parameter : parameters) {
-
-                // Session est injectée automatiquement
-                if (parameter.getType().equals(Session.class)) {
-                    continue;
-                }
-
-                // Les autres paramètres nécessitent @Param
-                if (!parameter.isAnnotationPresent(Param.class)) {
-                    methodeValide = false;
-                    break;
-                }
-            }
-
-            if (methodeValide) {
-                return m;
-            }
-        }
-
-        if (methodeSansParametre != null) {
-            return methodeSansParametre;
-        }
-
-        throw new ServletException("Methode introuvable ou parametres invalides : "+ nomMethode);
-    }
-
-    /**
-     * Récupère l'instance Session existante.
-     * Si elle n'existe pas, la crée à partir des attributs HTTP.
-     */
-    private Session recupererSession(HttpSession httpSession) {
-
-        Session session = (Session) httpSession.getAttribute(SESSION_ATTRIBUTE);
-
-        if (session != null) {
-            return session;
-        }
-
-        Map<String, Object> variables = new HashMap<>();
-
-        Enumeration<String> noms = httpSession.getAttributeNames();
-
-        while (noms.hasMoreElements()) {
-            String nom = noms.nextElement();
-
-            if (!SESSION_ATTRIBUTE.equals(nom)) {
-                variables.put(nom, httpSession.getAttribute(nom));
-            }
-        }
-
-        session = new Session(variables, httpSession.getId());
-
-        httpSession.setAttribute(SESSION_ATTRIBUTE, session);
-
-        return session;
-    }
-
-    /**
-     * Synchronise les variables de Session vers HttpSession.
-     * Les variables supprimées de la Map sont également supprimées
-     * de HttpSession, sauf l'attribut interne du framework.
-     */
-    private void synchroniserSession(Session session, HttpSession httpSession) {
-
-        Map<String, Object> variables = session.getVariables();
-
-        // Supprimer les attributs qui ne sont plus dans la Map
-        Enumeration<String> noms = httpSession.getAttributeNames();
-
-        while (noms.hasMoreElements()) {
-
-            String nom = noms.nextElement();
-
-            if (SESSION_ATTRIBUTE.equals(nom)) {
-                continue;
-            }
-
-            if (!variables.containsKey(nom)) {
-                httpSession.removeAttribute(nom);
-            }
-        }
-
-        // Ajouter ou actualiser les variables
-        for (Map.Entry<String, Object> entree : variables.entrySet()) {
-            httpSession.setAttribute(entree.getKey(), entree.getValue());
-        }
-    }
 }
