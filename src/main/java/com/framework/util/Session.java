@@ -16,7 +16,7 @@ public class Session {
         this.variables = variables;
     }
 
-    public void ajouterVariable(String nom, Object valeur) {
+    public void ajouter(String nom, Object valeur) {
         variables.put(nom, valeur);
     }
 
@@ -24,7 +24,7 @@ public class Session {
         variables.remove(nom);
     }
 
-    public Object getVariable(String nom) {
+    public Object get(String nom) {
         return variables.get(nom);
     }
 
@@ -47,6 +47,5 @@ public class Session {
     public boolean hasVariable(String nom) {
         return variables.containsKey(nom);
     }
-
 
 }
