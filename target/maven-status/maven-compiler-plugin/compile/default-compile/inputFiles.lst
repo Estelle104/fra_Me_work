@@ -7,6 +7,7 @@
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/annotation/UrlMapping.java
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/util/Utilitaire.java
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/upload/UploadedFile.java
+/home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/util/Session.java
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/annotation/Param.java
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/servlet/FrontControllerServlet.java
 /home/estelle/S4/MrNaina/WebDyn/framework/fra_Me_work/src/main/java/com/framework/util/ParamBinder.java

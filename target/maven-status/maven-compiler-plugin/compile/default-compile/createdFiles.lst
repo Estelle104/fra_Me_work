@@ -1,4 +1,5 @@
 com/framework/servlet/FrontControllerServlet.class
+com/framework/util/Session.class
 com/framework/annotation/Param.class
 com/framework/annotation/UrlMapping.class
 com/framework/upload/UploadedFile.class

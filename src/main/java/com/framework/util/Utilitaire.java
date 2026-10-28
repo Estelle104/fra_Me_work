@@ -2,18 +2,23 @@ package com.framework.util;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
-
+import com.framework.annotation.Param;
 import com.framework.annotation.UrlMapping;
 import com.framework.util.Mapping;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 public class Utilitaire {
     private static final Gson GSON = new Gson();
@@ -204,7 +209,7 @@ public class Utilitaire {
         // Type bool
         if (type == boolean.class || type == Boolean.class) {
             if (!valeur.equalsIgnoreCase("true") && !valeur.equalsIgnoreCase("false")) {
-                throw new IllegalArgumentException( "Valeur bool invalide : " + valeur);
+                throw new IllegalArgumentException("Valeur bool invalide : " + valeur);
             }
             return Boolean.parseBoolean(valeur);
         }
@@ -212,7 +217,7 @@ public class Utilitaire {
         // caractere
         if (type == char.class || type == Character.class) {
             if (valeur.length() != 1) {
-                throw new IllegalArgumentException( "Un caractère est attendu, valeur reçue : " + valeur);
+                throw new IllegalArgumentException("Un caractère est attendu, valeur reçue : " + valeur);
             }
             return valeur.charAt(0);
         }
@@ -225,7 +230,7 @@ public class Utilitaire {
             return resultat;
         }
 
-        throw new IllegalArgumentException( "Type simple non supporté : " + type.getName());
+        throw new IllegalArgumentException("Type simple non supporté : " + type.getName());
     }
 
     public static boolean estTypeSimple(Class<?> type) {
@@ -240,5 +245,119 @@ public class Utilitaire {
                 || type == byte.class || type == Byte.class
                 || type == char.class || type == Character.class
                 || type.isEnum();
+    }
+
+    /**
+     * Recherche une méthode d'action compatible avec les paramètres
+     * pris en charge par le framework.
+     *
+     * Un paramètre doit être de type Session ou posséder @Param.
+     */
+    public static Method trouverMethode(Class<?> clazz, String nomMethode) throws ServletException {
+
+        Method methodeSansParametre = null;
+
+        for (Method m : clazz.getDeclaredMethods()) {
+            if (!m.getName().equals(nomMethode)) {
+                continue;
+            }
+
+            Parameter[] parameters = m.getParameters();
+
+            // Priorité à la méthode sans paramètre
+            if (parameters.length == 0) {
+
+                methodeSansParametre = m;
+                continue;
+            }
+
+            boolean methodeValide = true;
+
+            for (Parameter parameter : parameters) {
+
+                // Session est injectée automatiquement
+                if (parameter.getType().equals(Session.class)) {
+                    continue;
+                }
+
+                // Les autres paramètres nécessitent @Param
+                if (!parameter.isAnnotationPresent(Param.class)) {
+                    methodeValide = false;
+                    break;
+                }
+            }
+
+            if (methodeValide) {
+                return m;
+            }
+        }
+
+        if (methodeSansParametre != null) {
+            return methodeSansParametre;
+        }
+
+        throw new ServletException("Methode introuvable ou parametres invalides : " + nomMethode);
+    }
+
+    /**
+     * Récupère l'instance Session existante.
+     * Si elle n'existe pas, la crée à partir des attributs HTTP.
+     */
+    public static  Session recupererSession(HttpSession httpSession, String SESSION_ATTRIBUTE) {
+
+        Session session = (Session) httpSession.getAttribute(SESSION_ATTRIBUTE);
+
+        if (session != null) {
+            return session;
+        }
+
+        Map<String, Object> variables = new HashMap<>();
+
+        Enumeration<String> noms = httpSession.getAttributeNames();
+
+        while (noms.hasMoreElements()) {
+            String nom = noms.nextElement();
+
+            if (!SESSION_ATTRIBUTE.equals(nom)) {
+                variables.put(nom, httpSession.getAttribute(nom));
+            }
+        }
+
+        session = new Session(variables, httpSession.getId());
+
+        httpSession.setAttribute(SESSION_ATTRIBUTE, session);
+
+        return session;
+    }
+
+    /**
+     * Synchronise les variables de Session vers HttpSession.
+     * Les variables supprimées de la Map sont également supprimées
+     * de HttpSession, sauf l'attribut interne du framework.
+     */
+    public static  void synchroniserSession(Session session, HttpSession httpSession, String SESSION_ATTRIBUTE) {
+
+        Map<String, Object> variables = session.getVariables();
+
+        // Supprimer les attributs qui ne sont plus dans la Map
+        Enumeration<String> noms = httpSession.getAttributeNames();
+
+        while (noms.hasMoreElements()) {
+
+            String nom = noms.nextElement();
+
+            if (SESSION_ATTRIBUTE.equals(nom)) {
+                continue;
+            }
+
+            if (!variables.containsKey(nom)) {
+                httpSession.removeAttribute(nom);
+            }
+        }
+
+        // Ajouter ou actualiser les variables
+        for (Map.Entry<String, Object> entree : variables.entrySet()) {
+            httpSession.setAttribute(entree.getKey(), entree.getValue());
+        }
     }
 }
