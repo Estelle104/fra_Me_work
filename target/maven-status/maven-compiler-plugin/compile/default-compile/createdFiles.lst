@@ -1,3 +1,4 @@
+com/framework/annotation/RoleRequired.class
 com/framework/servlet/FrontControllerServlet.class
 com/framework/util/Session.class
 com/framework/annotation/Param.class

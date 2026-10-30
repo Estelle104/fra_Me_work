@@ -12,6 +12,7 @@ import java.util.Map;
 import com.framework.annotation.AuthRequired;
 import com.framework.annotation.Json;
 import com.framework.annotation.Param;
+import com.framework.annotation.RoleRequired;
 import com.framework.util.Mapping;
 import com.framework.util.ModelView;
 import com.framework.util.ParamBinder;
@@ -125,7 +126,6 @@ public class FrontControllerServlet extends HttpServlet {
             }
 
             // Récupérer la session si la méthode en a besoin
-            // OU si elle exige une authentification
             if (utiliseSession || authRequise) {
 
                 // Si la méthode nécessite une authentification,
@@ -154,10 +154,21 @@ public class FrontControllerServlet extends HttpServlet {
                     return;
                 }
             }
-            if (utiliseSession) {
-                httpSession = request.getSession();
 
-                session = Utilitaire.recupererSession(httpSession, SESSION_ATTRIBUTE);
+            // Vérifier les autorisations par rôle
+            if (methode.isAnnotationPresent(RoleRequired.class)) {
+
+                RoleRequired roleRequired = methode.getAnnotation(RoleRequired.class);
+
+                String roleKey = context.getInitParameter("sessionRoleKey");
+
+                if (!Utilitaire.aRole(session, roleKey, roleRequired.value())) {
+
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                            "Vous n'avez pas les autorisations nécessaires.");
+
+                    return;
+                }
             }
 
             // 7. Préparer les arguments de la méthode

@@ -370,4 +370,27 @@ public class Utilitaire {
 
         return session.get(userKey) != null;
     }
+
+    // Mijery role
+    public static boolean aRole(Session session, String roleKey, String[] rolesAutorises) {
+
+        if (session == null || roleKey == null) {
+            return false;
+        }
+
+        Object roleUtilisateur = session.get(roleKey);
+
+        if (roleUtilisateur == null) {
+            return false;
+        }
+
+        for (String role : rolesAutorises) {
+
+            if (role.equalsIgnoreCase(roleUtilisateur.toString())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
