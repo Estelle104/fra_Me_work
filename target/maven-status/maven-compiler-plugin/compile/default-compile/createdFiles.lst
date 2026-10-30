@@ -13,3 +13,4 @@ com/framework/upload/MultipartParser.class
 com/framework/util/ParamBinder.class
 com/framework/util/Utilitaire.class
 com/framework/util/UtilMethode.class
+com/framework/annotation/AuthRequired.class

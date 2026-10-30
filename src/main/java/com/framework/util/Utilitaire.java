@@ -303,7 +303,7 @@ public class Utilitaire {
      * Récupère l'instance Session existante.
      * Si elle n'existe pas, la crée à partir des attributs HTTP.
      */
-    public static  Session recupererSession(HttpSession httpSession, String SESSION_ATTRIBUTE) {
+    public static Session recupererSession(HttpSession httpSession, String SESSION_ATTRIBUTE) {
 
         Session session = (Session) httpSession.getAttribute(SESSION_ATTRIBUTE);
 
@@ -335,7 +335,7 @@ public class Utilitaire {
      * Les variables supprimées de la Map sont également supprimées
      * de HttpSession, sauf l'attribut interne du framework.
      */
-    public static  void synchroniserSession(Session session, HttpSession httpSession, String SESSION_ATTRIBUTE) {
+    public static void synchroniserSession(Session session, HttpSession httpSession, String SESSION_ATTRIBUTE) {
 
         Map<String, Object> variables = session.getVariables();
 
@@ -359,5 +359,15 @@ public class Utilitaire {
         for (Map.Entry<String, Object> entree : variables.entrySet()) {
             httpSession.setAttribute(entree.getKey(), entree.getValue());
         }
+    }
+
+    // Voir si il y a une session
+    public static boolean estConnecte(Session session, String userKey) {
+
+        if (session == null || userKey == null || userKey.isBlank()) {
+            return false;
+        }
+
+        return session.get(userKey) != null;
     }
 }

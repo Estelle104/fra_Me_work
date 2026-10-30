@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.framework.annotation.AuthRequired;
 import com.framework.annotation.Json;
 import com.framework.annotation.Param;
 import com.framework.util.Mapping;
@@ -60,6 +61,8 @@ public class FrontControllerServlet extends HttpServlet {
 
         ServletContext context = getServletContext();
 
+        // String userKey = context.getInitParameter("sessionUserKey");
+
         @SuppressWarnings("unchecked")
         HashMap<UtilMethode, Mapping> urlMapping = (HashMap<UtilMethode, Mapping>) context.getAttribute("urlMapping");
 
@@ -92,7 +95,7 @@ public class FrontControllerServlet extends HttpServlet {
             ApplicationContext spring = (ApplicationContext) context.getAttribute("springContext");
 
             if (spring == null) {
-                throw new ServletException( "Le contexte Spring n'est pas initialise");
+                throw new ServletException("Le contexte Spring n'est pas initialise");
             }
 
             Object objet = spring.getBean(clazz);
@@ -105,12 +108,15 @@ public class FrontControllerServlet extends HttpServlet {
 
             Object[] valeurs = new Object[parameters.length];
 
-            // 6. Préparer la session si la méthode en a besoin
+            // 6. Préparer la session et vérifier l'authentification
+
             Session session = null;
             HttpSession httpSession = null;
 
             boolean utiliseSession = false;
+            boolean authRequise = methode.isAnnotationPresent(AuthRequired.class);
 
+            // Vérifier si la méthode utilise notre Session personnalisée
             for (Parameter parameter : parameters) {
                 if (parameter.getType().equals(Session.class)) {
                     utiliseSession = true;
@@ -118,6 +124,36 @@ public class FrontControllerServlet extends HttpServlet {
                 }
             }
 
+            // Récupérer la session si la méthode en a besoin
+            // OU si elle exige une authentification
+            if (utiliseSession || authRequise) {
+
+                // Si la méthode nécessite une authentification,
+                // ne pas créer une nouvelle session HTTP vide.
+                httpSession = request.getSession(!authRequise);
+
+                if (httpSession != null) {
+                    session = Utilitaire.recupererSession(
+                            httpSession,
+                            SESSION_ATTRIBUTE);
+                }
+            }
+
+            // Vérifier l'authentification APRÈS avoir récupéré la session
+            if (authRequise) {
+
+                AuthRequired auth = methode.getAnnotation(AuthRequired.class);
+
+                String userKey = context.getInitParameter("sessionUserKey");
+
+                if (!Utilitaire.estConnecte(session, userKey)) {
+
+                    response.sendRedirect(
+                            request.getContextPath() + auth.loginUrl());
+
+                    return;
+                }
+            }
             if (utiliseSession) {
                 httpSession = request.getSession();
 
@@ -137,13 +173,14 @@ public class FrontControllerServlet extends HttpServlet {
                 } else {
                     // Cas B : paramètre ordinaire avec @Param
                     if (!parameter.isAnnotationPresent(Param.class)) {
-                        throw new ServletException("Le parametre '"+ parameter.getName()+ "' doit avoir l'annotation @Param");
+                        throw new ServletException(
+                                "Le parametre '" + parameter.getName() + "' doit avoir l'annotation @Param");
                     }
 
                     Param param = parameter.getAnnotation(Param.class);
                     String nomParam = param.value();
 
-                    valeurs[i] = binder.resoudre(request,nomParam,parameter);
+                    valeurs[i] = binder.resoudre(request, nomParam, parameter);
                 }
             }
 
@@ -160,7 +197,7 @@ public class FrontControllerServlet extends HttpServlet {
 
                 cause.printStackTrace();
 
-                throw new ServletException("Erreur dans le controleur : " + cause.getMessage(),cause);
+                throw new ServletException("Erreur dans le controleur : " + cause.getMessage(), cause);
             }
 
             // 9. Synchroniser Session vers HttpSession
@@ -190,7 +227,7 @@ public class FrontControllerServlet extends HttpServlet {
             String prefixe = (String) context.getAttribute("viewPrefix");
             String suffixe = (String) context.getAttribute("viewSuffix");
 
-            String vue = Utilitaire.detectVue(retour,prefixe,suffixe);
+            String vue = Utilitaire.detectVue(retour, prefixe, suffixe);
 
             // 12. Ajouter les attributs du ModelView à la requête
             if (retour instanceof ModelView) {
